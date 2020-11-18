@@ -1,0 +1,54 @@
+version: '3'
+
+services:
+  mailserver-mariadb:
+    build:
+      context: ./build/mariadb/
+      dockerfile: Dockerfile
+    container_name: mailserver-mariadb
+    hostname: mailserver-mariadb
+    restart: always
+    env_file:
+      - secrets.env 
+    networks:
+      - mailserver-internal
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+  mailserver:
+    build:
+      context: ./build/mailserver/
+      dockerfile: Dockerfile
+    container_name: mailserver
+    hostname: mail
+    restart: always
+    env_file:
+      - secrets.env
+    networks:
+      - secondip-144
+      - mailserver-internal
+    volumes:
+      - ./data/ssl-cert:/etc/ssl-cert
+#      - /opt/containers/traefik/data/export/:/etc/ssl-cert
+      - ./data/vmail:/var/vmail
+      - ./data/dkim:/var/lib/rspamd/dkim
+      - ./data/dovecot-dh:/etc/dovecot/dh
+      - ./data/postfix-dh:/etc/postfix/dh
+    ports:
+      - 45.90.4.144:143:143
+      - 45.90.4.144:993:993
+      - 45.90.4.144:587:587
+      - 45.90.4.144:465:465
+      - 45.90.4.144:25:25
+      - 45.90.4.144:4190:4190
+ 
+
+networks:
+  secondip-144:
+    external: true
+  mailserver-internal:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.112.0.0/24
+

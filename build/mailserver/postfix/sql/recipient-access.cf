@@ -1,0 +1,5 @@
+user = vmail
+password = %vmaildbpassplaceholder%
+hosts = %hostnameplaceholder%
+dbname = vmail
+query = select if(sendonly = true, 'REJECT', 'OK') AS access from accounts where username = '%u' and domain = '%d' and enabled = true LIMIT 1;
